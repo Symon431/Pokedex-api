@@ -16,10 +16,15 @@ List<PokemonDto> pokemons = [
 
 
 //GET/pokemon
-app.MapGet("/pokemons", () => pokemons).WithName(GETpokemonEndpointName);
+app.MapGet("/pokemons", () => pokemons);
 
 //Get/pokemon/id
-app.MapGet("/pokemons/{id}", (int id)=> pokemons.Find(pokemon => pokemon.Id == id));
+app.MapGet("/pokemons/{id}", (int id)=> {
+    var game = pokemons.Find(pokemon => pokemon.Id == id);
+
+    return game is null ? Results.NotFound() : Results.Ok(game);
+
+    }).WithName(GETpokemonEndpointName);
 
 //POST/pokemon
 app.MapPost("/pokemons", (CreatePokemonDto newPokemon) =>
@@ -44,6 +49,11 @@ app.MapPut("/pokemons/{id}", (int id, UpdatePokemonDto updatePokemon) =>
 {
     var index = pokemons.FindIndex(pokemon => pokemon.Id == id);
 
+    if(index == -1)
+    {
+        return Results.NotFound();
+    }
+
     pokemons[index] = new PokemonDto(
         id,
         updatePokemon.Name,
@@ -59,7 +69,7 @@ app.MapPut("/pokemons/{id}", (int id, UpdatePokemonDto updatePokemon) =>
 });
 
 // DELETE/pokemon/{id}
-app.MapDelete("pokemons/{id}", (int id) => {
+app.MapDelete("/pokemons/{id}", (int id) => {
     
     pokemons.RemoveAll(pokemon => pokemon.Id == id);
 
