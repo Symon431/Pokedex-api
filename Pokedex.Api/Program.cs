@@ -58,7 +58,13 @@ app.MapPut("/pokemons/{id}", (int id, UpdatePokemonDto updatePokemon) =>
 
 });
 
+// DELETE/pokemon/{id}
+app.MapDelete("pokemons/{id}", (int id) => {
+    
+    pokemons.RemoveAll(pokemon => pokemon.Id == id);
 
+    return Results.NoContent();
+});
 
 
 app.Run();
