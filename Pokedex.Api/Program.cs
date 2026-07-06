@@ -37,8 +37,28 @@ app.MapPost("/pokemons", (CreatePokemonDto newPokemon) =>
     pokemons.Add(pokemon);
 
     return Results.CreatedAtRoute(GETpokemonEndpointName, new {id = pokemon.Id}, pokemon);
+});
 
+// PUT/pokemon/{id}
+app.MapPut("/pokemons/{id}", (int id, UpdatePokemonDto updatePokemon) =>
+{
+    var index = pokemons.FindIndex(pokemon => pokemon.Id == id);
+
+    pokemons[index] = new PokemonDto(
+        id,
+        updatePokemon.Name,
+        updatePokemon.Type,
+        updatePokemon.HP,
+        updatePokemon.Attack,
+        updatePokemon.Defense,
+        updatePokemon.ImageUrl
+    );
+
+    return Results.NoContent();
 
 });
+
+
+
 
 app.Run();
