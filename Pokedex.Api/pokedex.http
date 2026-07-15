@@ -4,31 +4,37 @@ GET http://localhost:5157/pokemons
 GET http://localhost:5157/pokemons/5
 
 ###
+GET http://localhost:5157/pokemons/name/PIKACHU
+
+###
 POST http://localhost:5157/pokemons
 Content-Type: application/json
 
 {
-    "name": "Lucario2",
-    "type": "Fighting/Steel",
-    "hp": 70,
-    "attack": 90,
-    "defense": 70,
-    "imageUrl": "https://assets.pokemon.com/assets/cms2/img/pokedex/full/448.png"
+  "name": "Test Pokemon",
+  "typeId": 3,
+  "hp": 60,
+  "attack": 65,
+  "defense": 60,
+  "imageUrl": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/94.png"
 }
-
 ###
 PUT http://localhost:5157/pokemons/7
 Content-Type: application/json
 
 {
     "name": "Lucario3",
-    "type": "Fighting/Running",
+    "typeId": 1,
     "hp": 78,
-    "attack": 120,
+    "attack": 90,
     "defense": 90,
     "imageUrl": "https://assets.pokemon.com/assets/cms2/img/pokedex/full/448.png"
 }
 
 ###
-DELETE http://localhost:5157/pokemons/3
+DELETE http://localhost:5157/pokemons/9
 
+###
+GET http://localhost:5157/types
+
+###
