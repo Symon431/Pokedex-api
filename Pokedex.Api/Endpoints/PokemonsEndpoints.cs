@@ -1,3 +1,5 @@
+using System.Reflection.Metadata.Ecma335;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Pokedex.Api.Data;
 using Pokedex.Api.Dtos;
@@ -9,13 +11,13 @@ namespace Pokedex.Api.Endpoints
     {
         const string GETpokemonEndpointName = "GETpokemon";
 
-        public static void MapPokemonsEndpoints(this WebApplication app)
-        {            
+        public static async Task MapPokemonsEndpoints(this WebApplication app)
+        {
 
             var group = app.MapGroup("/pokemons");
 
             //GET/pokemon
-            group.MapGet("/", async (PokemonStoreContext dbContext) 
+            group.MapGet("/", async (PokemonStoreContext dbContext)
                 => await dbContext.Pokemons
                 .Include(pokemon => pokemon.Type)
                 .Select(pokemon => new PokemonSummaryDto(
@@ -31,7 +33,8 @@ namespace Pokedex.Api.Endpoints
                 .ToListAsync());
 
             //Get/pokemon/id
-            group.MapGet("/{id}", async (int id, PokemonStoreContext dbContext)=> {
+            group.MapGet("/{id}", async (int id, PokemonStoreContext dbContext) =>
+            {
                 var pokemon = await dbContext.Pokemons.FindAsync(id);
 
                 return pokemon is null ? Results.NotFound() : Results.Ok(
@@ -46,10 +49,10 @@ namespace Pokedex.Api.Endpoints
                     )
                 );
 
-                }).WithName(GETpokemonEndpointName);
+            }).WithName(GETpokemonEndpointName);
 
             //POST/pokemon
-            group.MapPost("/", async(CreatePokemonDto newPokemon, PokemonStoreContext dbContext) =>
+            group.MapPost("/", async (CreatePokemonDto newPokemon, PokemonStoreContext dbContext) =>
             {
                 Pokemon pokemon = new()
                 {
@@ -74,15 +77,15 @@ namespace Pokedex.Api.Endpoints
                     pokemon.ImageUrl
                 );
 
-                return Results.CreatedAtRoute(GETpokemonEndpointName, new {id = pokemonDto.Id}, pokemonDto);
+                return Results.CreatedAtRoute(GETpokemonEndpointName, new { id = pokemonDto.Id }, pokemonDto);
             });
 
             // PUT/pokemon/{id}
-            group.MapPut("/{id}", async (PokemonStoreContext dbContext , int id, UpdatePokemonDto updatePokemon) =>
+            group.MapPut("/{id}", async (PokemonStoreContext dbContext, int id, UpdatePokemonDto updatePokemon) =>
             {
                 var existingPokemon = await dbContext.Pokemons.FindAsync(id);
 
-                if(existingPokemon is null)
+                if (existingPokemon is null)
                 {
                     return Results.NotFound();
                 }
@@ -109,6 +112,36 @@ namespace Pokedex.Api.Endpoints
 
                 return Results.NoContent();
             });
+
+            group.MapGet("/name/{name}", async (string name, PokemonStoreContext dbContext) =>
+            {
+
+                var matchingPokemon = await (dbContext.Pokemons
+                .Include(pokemon => pokemon.Type)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(pokemon => EF.Functions.ILike(pokemon.Name, name))
+                );
+
+                if (matchingPokemon is null)
+                {
+                    return Results.NotFound();
+                }
+
+
+
+                return Results.Ok(
+                    new PokemonSummaryDto
+                (
+                    matchingPokemon.Id,
+                    matchingPokemon.Name,
+                    matchingPokemon.Type.Name,
+                    matchingPokemon.Hp,
+                    matchingPokemon.Attack,
+                    matchingPokemon.Defense,
+                    matchingPokemon.ImageUrl
+                ));
+            });
+
         }
     }
 }
