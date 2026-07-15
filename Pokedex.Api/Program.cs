@@ -5,14 +5,23 @@ using Pokedex.Api.Endpoints;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddValidation();
+builder.AddPokemonStoreDb();
 
-var connString = builder.Configuration.GetConnectionString("PokemonStore");
 
-builder.Services.AddDbContext<PokemonStoreContext>(options =>
-    options.UseNpgsql(connString));
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
 app.MapPokemonsEndpoints();
+app.MapPokemonsTypeEndpoints();
+
+app.MigrateDb();
 
 app.Run();
